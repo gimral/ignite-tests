@@ -56,14 +56,12 @@ public class IgniteTextQuery {
         ccfg.setIndexedTypes(Long.class, Customer.class);
 
         IgniteCache<Long, Customer> custCache = client.getOrCreateCache(ccfg);
-        custCache.put(1L, new Customer(1L, "Gokhan", "Imral"));
-        custCache.put(2L, new Customer(2L, "Gokhani", "Imral"));
-        custCache.put(3L, new Customer(3L, "Gokhan", "White"));
-        custCache.put(4L, new Customer(4L, "Trukel", "Asaasa"));
-        custCache.put(5L, new Customer(5L, "Gokhen", "Imral"));
-        custCache.put(6L, new Customer(6L, "Gakhen", "Imral"));
-        custCache.put(7L, new Customer(7L, "Gakhena", "Imral"));
-        custCache.put(8L, new Customer(8L, "Gokhena", "Imral"));
+        custCache.put(1L, new Customer(1L, "Nicolas", "Tesla"));
+        custCache.put(2L, new Customer(2L, "Nicolas", "White"));
+        custCache.put(3L, new Customer(3L, "Thomas", "Edison"));
+        custCache.put(4L, new Customer(4L, "Nick", "Tesla"));
+        custCache.put(5L, new Customer(5L, "Nichol", "Tesla"));
+        custCache.put(6L, new Customer(6L, "Nikola", "Tesla")); //Correct
 
         CacheConfiguration<Long, Customer> confPerf = new CacheConfiguration<>();
         confPerf.setName("customerPerf");
@@ -103,23 +101,69 @@ public class IgniteTextQuery {
     public void testFuzzySearchMaxStep() throws Exception {
 
         IgniteCache<Long, Customer> cache = client.cache("customer");
-        // Put data
-
-        // Get data from the cache
         TextQuery<Long, Customer> qry =
-                new TextQuery<>(Customer.class, "name:Gokhen~2 AND surname:Imral");
+                new TextQuery<>(Customer.class, "name:Nicoles~2 AND surname:Tesla");
         List<Cache.Entry<Long, Customer>> customers = cache.query(qry).getAll();
         List<Long> customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
         ArrayList<Long> expected = new ArrayList<>();
         System.out.println(customers);
         expected.add(1L);
-        expected.add(2L);
-        expected.add(5L);
+        Assert.assertEquals(customerIds, expected);
+
+        qry =
+                new TextQuery<>(Customer.class, "name:Nikolas~2 AND surname:Tesla");
+        customers = cache.query(qry).getAll();
+        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+        expected = new ArrayList<>();
+        System.out.println(customers);
+        expected.add(1L);
         expected.add(6L);
-        expected.add(7L);
-        expected.add(8L);
+        Assert.assertEquals(customerIds, expected);
+
+        qry =
+                new TextQuery<>(Customer.class, "name:Nikoles~2 AND surname:Tesla");
+        customers = cache.query(qry).getAll();
+        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+        expected = new ArrayList<>();
+        System.out.println(customers);
+        expected.add(1L);
+        expected.add(6L);
         Assert.assertEquals(customerIds, expected);
     }
+
+//    @Test
+//    public void testMultiWordFuzzySearchMaxStep() throws Exception {
+//
+//        IgniteCache<Long, Customer> cache = client.cache("customer");
+//        TextQuery<Long, Customer> qry =
+//                new TextQuery<>(Customer.class, "name:Nicoles~2 AND surname:Tesla");
+//        List<Cache.Entry<Long, Customer>> customers = cache.query(qry).getAll();
+//        List<Long> customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+//        ArrayList<Long> expected = new ArrayList<>();
+//        System.out.println(customers);
+//        expected.add(1L);
+//        Assert.assertEquals(customerIds, expected);
+//
+//        qry =
+//                new TextQuery<>(Customer.class, "name:Nikolas~2 AND surname:Tesla");
+//        customers = cache.query(qry).getAll();
+//        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+//        expected = new ArrayList<>();
+//        System.out.println(customers);
+//        expected.add(1L);
+//        expected.add(6L);
+//        Assert.assertEquals(customerIds, expected);
+//
+//        qry =
+//                new TextQuery<>(Customer.class, "name:Nikoles~2 AND surname:Tesla");
+//        customers = cache.query(qry).getAll();
+//        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+//        expected = new ArrayList<>();
+//        System.out.println(customers);
+//        expected.add(1L);
+//        expected.add(6L);
+//        Assert.assertEquals(customerIds, expected);
+//    }
 
     @Test
     public void testFuzzySearchOneStep() throws Exception {
@@ -127,15 +171,30 @@ public class IgniteTextQuery {
         IgniteCache<Long, Customer> cache = client.cache("customer");
         // Get data from the cache
         TextQuery<Long, Customer> qry =
-                new TextQuery<>(Customer.class, "name:Gokhen~1 AND surname:Imral");
+                new TextQuery<>(Customer.class, "name:Nicoles~1 AND surname:Tesla");
         List<Cache.Entry<Long, Customer>> customers = cache.query(qry).getAll();
         List<Long> customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
         ArrayList<Long> expected = new ArrayList<>();
         System.out.println(customers);
         expected.add(1L);
-        expected.add(5L);
+        Assert.assertEquals(customerIds, expected);
+
+        qry =
+                new TextQuery<>(Customer.class, "name:Nikolas~1 AND surname:Tesla");
+        customers = cache.query(qry).getAll();
+        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+        expected = new ArrayList<>();
+        System.out.println(customers);
+        expected.add(1L);
         expected.add(6L);
-        expected.add(8L);
+        Assert.assertEquals(customerIds, expected);
+
+        qry =
+                new TextQuery<>(Customer.class, "name:Nikoles~1 AND surname:Tesla");
+        customers = cache.query(qry).getAll();
+        customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
+        expected = new ArrayList<>();
+        System.out.println(customers);
         Assert.assertEquals(customerIds, expected);
     }
 
@@ -145,17 +204,13 @@ public class IgniteTextQuery {
         IgniteCache<Long, Customer> cache = client.cache("customer");
         // Get data from the cache
         TextQuery<Long, Customer> qry =
-                new TextQuery<>(Customer.class, "name:Gokhen~0.5 AND surname:Imral");
+                new TextQuery<>(Customer.class, "name:Nicolas~0.5 AND surname:Tesla");
         List<Cache.Entry<Long, Customer>> customers = cache.query(qry).getAll();
         List<Long> customerIds = customers.stream().map(c -> c.getValue().getCustomerId()).sorted().collect(Collectors.toList());
         ArrayList<Long> expected = new ArrayList<>();
         System.out.println(customers);
         expected.add(1L);
-        expected.add(2L);
-        expected.add(5L);
         expected.add(6L);
-        expected.add(7L);
-        expected.add(8L);
         Assert.assertEquals(customerIds, expected);
     }
 
